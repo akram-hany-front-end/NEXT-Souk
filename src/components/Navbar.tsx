@@ -1,7 +1,8 @@
 "use client";
-
+import { useRef } from "react";
 import {
-    LayoutDashboard,
+    LayoutDashboard, ChevronRight,
+    ChevronLeft,
     Search,
     ShoppingBag,
     CircleUserRound,
@@ -9,6 +10,7 @@ import {
     Factory,
     Users,
     Truck,
+    UserRound,
     Store,
     BriefcaseBusiness,
 } from "lucide-react";
@@ -23,9 +25,39 @@ export const adminLinks = [
         icon: LayoutDashboard,
     },
     {
-        title: "Market",
+        title: "Markets",
         href: "/dashboard/admin/markets",
         icon: Store,
+    },
+    {
+        title: "Retailers",
+        href: "/dashboard/admin/retailers",
+        icon: Users,
+    },
+    {
+        title: "RMDs",
+        href: "/dashboard/admin/rmds",
+        icon: Factory,
+    },
+    {
+        title: "Shippers",
+        href: "/dashboard/admin/shippers",
+        icon: Truck,
+    },
+    {
+        title: "Users",
+        href: "/dashboard/admin/users",
+        icon: UserRound,
+    },
+    {
+        title: "Wholesalers",
+        href: "/dashboard/admin/wholesalers",
+        icon: Store,
+    },
+    {
+        title: "Workers",
+        href: "/dashboard/admin/workers",
+        icon: BriefcaseBusiness,
     },
     {
         title: "Search",
@@ -204,7 +236,22 @@ type NavbarProps = {
     role?: string;
 };
 
-const Navbar = ({ role }: NavbarProps) => {
+const Navbar = ({ role = Roles.ADMIN }: NavbarProps) => {
+    const navRef = useRef<HTMLDivElement>(null);
+
+    const scrollLeft = () => {
+        navRef.current?.scrollBy({
+            left: -440,
+            behavior: "smooth",
+        });
+    };
+
+    const scrollRight = () => {
+        navRef.current?.scrollBy({
+            left: 440,
+            behavior: "smooth",
+        });
+    };
     const handleLogout = async () => {
         // await signOut({
         //   callbackUrl: "/sign-in",
@@ -246,22 +293,48 @@ const Navbar = ({ role }: NavbarProps) => {
                 </Link>
 
                 {/* Navigation */}
-                <div className="flex flex-1 items-center justify-center gap-1 overflow-x-auto">
-                    {menuItems.map((item) => {
-                        const Icon = item.icon;
+                <div className="flex items-center gap-1">
+                    {/* Left Arrow */}
+                    <button
+                        type="button"
+                        onClick={scrollLeft}
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                    >
+                        <ChevronLeft size={20} />
+                    </button>
 
-                        return (
-                            <Link
-                                key={item.title}
-                                href={item.href}
-                                className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
-                            >
-                                <Icon size={18} />
+                    {/* Navigation */}
+                    <div className="w-[440px] shrink-0 overflow-hidden">
+                        <div
+                            ref={navRef}
+                            className="flex gap-2 overflow-x-auto scroll-smooth scrollbar-hide"
+                        >
+                            {menuItems.map((item) => {
+                                const Icon = item.icon;
 
-                                <span>{item.title}</span>
-                            </Link>
-                        );
-                    })}
+                                return (
+                                    <Link
+                                        key={item.title}
+                                        href={item.href}
+                                        className="flex w-[104px] shrink-0 items-center justify-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                                    >
+                                        <Icon size={18} />
+
+                                        <span className="truncate">{item.title}</span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Right Arrow */}
+                    <button
+                        type="button"
+                        onClick={scrollRight}
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                    >
+                        <ChevronRight size={20} />
+                    </button>
                 </div>
 
                 {/* Logout */}
