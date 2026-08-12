@@ -278,12 +278,12 @@ const Navbar = ({ role = Roles.FACTORY }: NavbarProps) => {
                     href="/"
                     className="flex shrink-0 items-center gap-2 sm:gap-3"
                 >
-                    <Image
+                    {/* <Image
                         src="/logo.png"
                         alt="Souq Logo"
                         width={38}
                         height={38}
-                    />
+                    /> */}
 
                     <span className="hidden text-xl font-bold text-gray-900 sm:block dark:text-white">
                         Souq
