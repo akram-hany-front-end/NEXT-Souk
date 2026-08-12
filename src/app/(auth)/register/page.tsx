@@ -81,46 +81,86 @@ export default function Page() {
         setSuccess("");
     };
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-        setError("");
-        setSuccess("");
+    setError("");
+    setSuccess("");
 
-        if (
-            !form.city ||
-            !form.name ||
-            !form.email ||
-            !form.phone ||
-            !form.password ||
-            !form.confirmPassword ||
-            !form.age ||
-            !form.nationalId ||
-            !form.role
-        ) {
-            setError("Please fill in all fields.");
+    if (
+        !form.city ||
+        !form.name ||
+        !form.email ||
+        !form.phone ||
+        !form.password ||
+        !form.confirmPassword ||
+        !form.age ||
+        !form.nationalId ||
+        !form.role
+    ) {
+        setError("Please fill in all fields.");
+        return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+        setError("Passwords do not match.");
+        return;
+    }
+
+    if (form.password.length < 6) {
+        setError("Password must be at least 6 characters.");
+        return;
+    }
+
+    if (form.nationalId.length !== 14) {
+        setError("National ID must be 14 digits.");
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                city: form.city,
+                name: form.name,
+                email: form.email,
+                phone: form.phone,
+                password: form.password,
+                age: Number(form.age),
+                nationalId: form.nationalId,
+                role: form.role,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            setError(data.message || "Something went wrong.");
             return;
         }
 
-        if (form.password !== form.confirmPassword) {
-            setError("Passwords do not match.");
-            return;
-        }
+        setSuccess("Account created successfully.");
 
-        if (form.password.length < 6) {
-            setError("Password must be at least 6 characters.");
-            return;
-        }
-
-        if (form.nationalId.length !== 14) {
-            setError("National ID must be 14 digits.");
-            return;
-        }
-
-        setSuccess("Account information is valid.");
-
-        console.log("Register Data:", form);
-    };
+        // Reset form
+        setForm({
+            city: "",
+            name: "",
+            email: "",
+            phone: "",
+            password: "",
+            confirmPassword: "",
+            age: "",
+            nationalId: "",
+            role: "",
+        });
+    } catch (error) {
+        console.error(error);
+        setError("Unable to connect to the server.");
+    }
+};
 
     return (
         <main className="min-h-screen bg-gray-50 px-4 py-10 dark:bg-gray-950">

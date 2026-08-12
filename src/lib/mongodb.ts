@@ -1,13 +1,39 @@
-import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
 
-const uri = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!uri) {
-  throw new Error("Please define MONGODB_URI in .env.local");
+type MongooseCache = {
+    conn: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
+};
+
+declare global {
+    var mongooseCache: MongooseCache | undefined;
 }
 
-const client = new MongoClient(uri);
+if (!MONGODB_URI) {
+    throw new Error("MONGODB_URI is not defined");
+}
 
-const clientPromise = client.connect();
+const cached: MongooseCache = global.mongooseCache ?? {
+    conn: null,
+    promise: null,
+};
 
-export default clientPromise;
+global.mongooseCache = cached;
+
+async function connectDB() {
+    if (cached.conn) {
+        return cached.conn;
+    }
+
+    if (!cached.promise) {
+        cached.promise = mongoose.connect(MONGODB_URI!);
+    }
+
+    cached.conn = await cached.promise;
+
+    return cached.conn;
+}
+
+export default connectDB;
