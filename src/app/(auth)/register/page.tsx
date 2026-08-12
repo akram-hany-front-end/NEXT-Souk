@@ -47,7 +47,7 @@ const governorates = [
     "South Sinai",
 ];
 
-const roleOptions = Object.values(Roles).filter((role) => role !== Roles.ADMIN);
+const roleOptions = Object.values(Roles).filter((role) => role );
 
 export default function Page() {
     const [form, setForm] = useState<RegisterForm>({

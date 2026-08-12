@@ -17,6 +17,7 @@ import {
     BriefcaseBusiness,
     Mail,
 } from "lucide-react";
+import { signOut } from "next-auth/react";
 import { Roles } from "@/lib/roles";
 import Image from "next/image";
 import Link from "next/link";

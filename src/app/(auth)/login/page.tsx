@@ -3,13 +3,23 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-
+import { getSession, signIn } from "next-auth/react";
+import { Roles, type Role } from "@/lib/roles";
 type LoginForm = {
     email: string;
     password: string;
     nationalId: string;
 };
-
+const roleRoutes: Record<Role, string> = {
+    [Roles.ADMIN]: "/admin",
+    [Roles.FACTORY]: "/factory",
+    [Roles.WHOLESALER]: "/wholesaler",
+    [Roles.SHIPPER]: "/shipper",
+    [Roles.RMD]: "/rmd",
+    [Roles.WORKER]: "/worker",
+    [Roles.RETAILER]: "/retailer",
+    [Roles.USER]: "/user",
+};
 export default function Page() {
     const [form, setForm] = useState<LoginForm>({
         email: "",
@@ -20,6 +30,9 @@ export default function Page() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+
+
+
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -34,23 +47,67 @@ export default function Page() {
         setError("");
         setSuccess("");
     };
-    // Handle sumit
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+
+    // Handle submit
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         setError("");
         setSuccess("");
-        // VALIDATION
-        if (!form.email || !form.password || !form.nationalId) {
+
+        const email = form.email.trim().toLowerCase();
+        const password = form.password;
+        const nationalId = form.nationalId.trim();
+
+        if (!email || !password || !nationalId) {
             setError("Please fill in all fields.");
             return;
         }
 
-        setSuccess("Account information is valid.");
+        if (nationalId.length !== 14) {
+            setError("National ID must be 14 digits.");
+            return;
+        }
 
-        console.log("Register Data:", form);
+        try {
+            console.log("FORM EMAIL:", JSON.stringify(form.email));
+            console.log("FORM PASSWORD:", JSON.stringify(form.password));
+            console.log("FORM NATIONAL ID:", JSON.stringify(form.nationalId));
+            const result = await signIn("credentials", {
+                email,
+                password,
+                nationalId,
+                redirect: false,
+            });
+
+            console.log("SIGN IN RESULT:", result);
+if (!result || result.error) {
+    setError("Invalid email, password, or national ID.");
+    return;
+}
+
+const session = await getSession();
+
+if (!session?.user?.role) {
+    setError("Unable to determine your account role.");
+    return;
+}
+
+const role = session.user.role as Role;
+const redirectPath = roleRoutes[role];
+
+if (!redirectPath) {
+    setError("Invalid account role.");
+    return;
+}
+
+window.location.href = redirectPath;
+            console.log("Login successful");
+        } catch (error) {
+            console.error("LOGIN ERROR:", error);
+            setError("Unable to connect to the server.");
+        }
     };
-
     return (
         <main className="min-h-screen bg-gray-50 px-4 py-10 dark:bg-gray-950">
             <div className="mx-auto w-lg max-w-3xl">
@@ -80,7 +137,6 @@ export default function Page() {
                                     >
                                         National ID
                                     </label>
-
                                     <input
                                         id="nationalId"
                                         name="nationalId"
@@ -88,7 +144,17 @@ export default function Page() {
                                         inputMode="numeric"
                                         maxLength={14}
                                         value={form.nationalId}
-                                        onChange={handleChange}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, "");
+
+                                            setForm((prev) => ({
+                                                ...prev,
+                                                nationalId: value,
+                                            }));
+
+                                            setError("");
+                                            setSuccess("");
+                                        }}
                                         placeholder="Enter 14-digit national ID"
                                         className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-white"
                                     />

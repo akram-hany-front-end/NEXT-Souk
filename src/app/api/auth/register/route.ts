@@ -18,6 +18,7 @@ export async function POST(request: Request) {
             city,
             age,
             nationalId,
+                role,
         } = body;
 
         // Validation
@@ -28,6 +29,7 @@ export async function POST(request: Request) {
             !phone ||
             !city ||
             !age ||
+            !role ||
             !nationalId
         ) {
             return NextResponse.json(
@@ -69,7 +71,7 @@ export async function POST(request: Request) {
             city: city.trim(),
             age: Number(age),
             nationalId: nationalId.trim(),
-            role: "USER",
+            role: role,
         });
 
         return NextResponse.json(
