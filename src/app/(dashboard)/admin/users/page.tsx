@@ -136,7 +136,7 @@ export default function AboutPage() {
                     </h1>
 
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Manage registered Wholesalers and their information.
+                        Manage registered Users and their information.
                     </p>
                 </div>
 
@@ -324,6 +324,7 @@ export default function AboutPage() {
                         </p>
                     </div>
                 )}
+
                 {/* Pagination */}
                 {totalPages > 1 && (
                     <div className="mt-6 flex items-center justify-center gap-2">

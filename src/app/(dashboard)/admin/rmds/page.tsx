@@ -136,7 +136,7 @@ export default function AboutPage() {
                     </h1>
 
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Manage registered Wholesalers and their information.
+                        Manage registered RMDs and their information.
                     </p>
                 </div>
 
@@ -253,7 +253,7 @@ export default function AboutPage() {
                             <div className="mb-5 flex items-center justify-between">
                                 <div>
                                     <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                                        {user.name}
+                                        {user.name}R and
                                     </h2>
 
                                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">

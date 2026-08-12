@@ -1,7 +1,9 @@
 "use client";
+
 import { useRef } from "react";
 import {
-    LayoutDashboard, ChevronRight,
+    LayoutDashboard,
+    ChevronRight,
     ChevronLeft,
     Search,
     ShoppingBag,
@@ -13,6 +15,7 @@ import {
     UserRound,
     Store,
     BriefcaseBusiness,
+    Mail,
 } from "lucide-react";
 import { Roles } from "@/lib/roles";
 import Image from "next/image";
@@ -21,57 +24,47 @@ import Link from "next/link";
 export const adminLinks = [
     {
         title: "Dashboard",
-        href: "/dashboard/admin",
+        href: "/admin",
         icon: LayoutDashboard,
     },
     {
-        title: "Markets",
-        href: "/dashboard/admin/markets",
-        icon: Store,
+        title: "Manage requests",
+        href: "/admin/manageposts",
+        icon: Mail,
     },
     {
         title: "Retailers",
-        href: "/dashboard/admin/retailers",
+        href: "/admin/retailers",
         icon: Users,
     },
     {
         title: "RMDs",
-        href: "/dashboard/admin/rmds",
+        href: "/admin/rmds",
         icon: Factory,
     },
     {
         title: "Shippers",
-        href: "/dashboard/admin/shippers",
+        href: "/admin/shippers",
         icon: Truck,
     },
     {
         title: "Users",
-        href: "/dashboard/admin/users",
+        href: "/admin/users",
         icon: UserRound,
     },
     {
         title: "Wholesalers",
-        href: "/dashboard/admin/wholesalers",
+        href: "/admin/wholesalers",
         icon: Store,
     },
     {
         title: "Workers",
-        href: "/dashboard/admin/workers",
+        href: "/admin/workers",
         icon: BriefcaseBusiness,
     },
     {
-        title: "Search",
-        href: "/dashboard/admin/search",
-        icon: Search,
-    },
-    {
-        title: "Sale",
-        href: "/dashboard/admin/sale",
-        icon: ShoppingBag,
-    },
-    {
         title: "Profile",
-        href: "/dashboard/admin/profile",
+        href: "/admin/profile",
         icon: CircleUserRound,
     },
 ];
@@ -79,22 +72,22 @@ export const adminLinks = [
 export const factoryLinks = [
     {
         title: "Dashboard",
-        href: "/dashboard/factory",
+        href: "/factory",
         icon: LayoutDashboard,
     },
     {
         title: "Search",
-        href: "/dashboard/factory/search",
+        href: "/factory/search",
         icon: Search,
     },
     {
         title: "Sell",
-        href: "/dashboard/factory/sell",
+        href: "/factory/sell",
         icon: ShoppingBag,
     },
     {
         title: "Profile",
-        href: "/dashboard/factory/profile",
+        href: "/factory/profile",
         icon: CircleUserRound,
     },
 ];
@@ -102,22 +95,22 @@ export const factoryLinks = [
 export const retailerLinks = [
     {
         title: "Dashboard",
-        href: "/dashboard/retailer",
+        href: "/retailer",
         icon: LayoutDashboard,
     },
     {
         title: "Search",
-        href: "/dashboard/retailer/search",
+        href: "/retailer/search",
         icon: Search,
     },
     {
         title: "Sell",
-        href: "/dashboard/retailer/sell",
+        href: "/retailer/sell",
         icon: ShoppingBag,
     },
     {
         title: "Profile",
-        href: "/dashboard/retailer/profile",
+        href: "/retailer/profile",
         icon: CircleUserRound,
     },
 ];
@@ -125,22 +118,22 @@ export const retailerLinks = [
 export const rmdLinks = [
     {
         title: "Dashboard",
-        href: "/dashboard/rms",
+        href: "/rmd",
         icon: LayoutDashboard,
     },
     {
         title: "Search",
-        href: "/dashboard/rms/search",
+        href: "/rmd/search",
         icon: Search,
     },
     {
         title: "Sell",
-        href: "/dashboard/rms/sell",
+        href: "/rmd/sell",
         icon: ShoppingBag,
     },
     {
         title: "Profile",
-        href: "/dashboard/rms/profile",
+        href: "/rmd/profile",
         icon: CircleUserRound,
     },
 ];
@@ -148,22 +141,22 @@ export const rmdLinks = [
 export const shipperLinks = [
     {
         title: "Dashboard",
-        href: "/dashboard/shipper",
+        href: "/shipper",
         icon: LayoutDashboard,
     },
     {
         title: "Search",
-        href: "/dashboard/shipper/search",
+        href: "/shipper/search",
         icon: Search,
     },
     {
         title: "Sell",
-        href: "/dashboard/shipper/sell",
+        href: "/shipper/sell",
         icon: ShoppingBag,
     },
     {
         title: "Profile",
-        href: "/dashboard/shipper/profile",
+        href: "/shipper/profile",
         icon: CircleUserRound,
     },
 ];
@@ -171,17 +164,17 @@ export const shipperLinks = [
 export const userLinks = [
     {
         title: "Dashboard",
-        href: "/dashboard/user",
+        href: "/user",
         icon: LayoutDashboard,
     },
     {
         title: "Search",
-        href: "/dashboard/user/search",
+        href: "/user/search",
         icon: Search,
     },
     {
         title: "Profile",
-        href: "/dashboard/user/profile",
+        href: "/user/profile",
         icon: CircleUserRound,
     },
 ];
@@ -189,22 +182,22 @@ export const userLinks = [
 export const wholesalerLinks = [
     {
         title: "Dashboard",
-        href: "/dashboard/wholesaler",
+        href: "/wholesaler",
         icon: LayoutDashboard,
     },
     {
         title: "Search",
-        href: "/dashboard/wholesaler/search",
+        href: "/wholesaler/search",
         icon: Search,
     },
     {
         title: "Sell",
-        href: "/dashboard/wholesaler/sell",
+        href: "/wholesaler/sell",
         icon: ShoppingBag,
     },
     {
         title: "Profile",
-        href: "/dashboard/wholesaler/profile",
+        href: "/wholesaler/profile",
         icon: CircleUserRound,
     },
 ];
@@ -212,22 +205,22 @@ export const wholesalerLinks = [
 export const workerLinks = [
     {
         title: "Dashboard",
-        href: "/dashboard/worker",
+        href: "/worker",
         icon: LayoutDashboard,
     },
     {
         title: "Search",
-        href: "/dashboard/worker/search",
+        href: "/worker/search",
         icon: Search,
     },
     {
         title: "Sell",
-        href: "/dashboard/worker/sell",
+        href: "/worker/sell",
         icon: ShoppingBag,
     },
     {
         title: "Profile",
-        href: "/dashboard/worker/profile",
+        href: "/worker/profile",
         icon: CircleUserRound,
     },
 ];
@@ -236,25 +229,26 @@ type NavbarProps = {
     role?: string;
 };
 
-const Navbar = ({ role = Roles.ADMIN }: NavbarProps) => {
+const Navbar = ({ role = Roles.FACTORY }: NavbarProps) => {
     const navRef = useRef<HTMLDivElement>(null);
 
     const scrollLeft = () => {
         navRef.current?.scrollBy({
-            left: -440,
+            left: -300,
             behavior: "smooth",
         });
     };
 
     const scrollRight = () => {
         navRef.current?.scrollBy({
-            left: 440,
+            left: 300,
             behavior: "smooth",
         });
     };
+
     const handleLogout = async () => {
         // await signOut({
-        //   callbackUrl: "/sign-in",
+        //     callbackUrl: "/sign-in",
         // });
     };
 
@@ -277,14 +271,18 @@ const Navbar = ({ role = Roles.ADMIN }: NavbarProps) => {
 
     return (
         <nav className="w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
-            <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-6 px-4">
+            <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center gap-2 px-2 sm:gap-4 sm:px-4">
+
                 {/* Logo */}
-                <Link href="/" className="flex shrink-0 items-center gap-3">
+                <Link
+                    href="/"
+                    className="flex shrink-0 items-center gap-2 sm:gap-3"
+                >
                     <Image
                         src="/logo.png"
                         alt="Souq Logo"
-                        width={40}
-                        height={40}
+                        width={38}
+                        height={38}
                     />
 
                     <span className="hidden text-xl font-bold text-gray-900 sm:block dark:text-white">
@@ -293,22 +291,25 @@ const Navbar = ({ role = Roles.ADMIN }: NavbarProps) => {
                 </Link>
 
                 {/* Navigation */}
-                <div className="flex items-center gap-1">
+                <div className="flex min-w-0 flex-1 items-center gap-1">
+
                     {/* Left Arrow */}
                     <button
                         type="button"
                         onClick={scrollLeft}
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 sm:h-9 sm:w-9 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
                     >
-                        <ChevronLeft size={20} />
+                        <ChevronLeft size={18} />
                     </button>
 
-                    {/* Navigation */}
-                    <div className="w-[440px] shrink-0 overflow-hidden">
+                    {/* Navigation Items */}
+                    <div className="min-w-0 flex-1 overflow-hidden">
                         <div
                             ref={navRef}
-                            className="flex gap-2 overflow-x-auto scroll-smooth scrollbar-hide"
-                        >
+                            className={`flex gap-1 overflow-x-auto scroll-smooth scrollbar-hide sm:gap-2 ${menuItems.length <= 4
+                                    ? "justify-center"
+                                    : "justify-start"
+                                }`}                   >
                             {menuItems.map((item) => {
                                 const Icon = item.icon;
 
@@ -316,11 +317,13 @@ const Navbar = ({ role = Roles.ADMIN }: NavbarProps) => {
                                     <Link
                                         key={item.title}
                                         href={item.href}
-                                        className="flex w-[104px] shrink-0 items-center justify-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                                        className="flex h-9 min-w-[90px] shrink-0 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 sm:min-w-[104px] sm:gap-2 sm:px-3 sm:text-sm dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
                                     >
-                                        <Icon size={18} />
+                                        <Icon size={17} />
 
-                                        <span className="truncate">{item.title}</span>
+                                        <span className="truncate">
+                                            {item.title}
+                                        </span>
                                     </Link>
                                 );
                             })}
@@ -331,9 +334,9 @@ const Navbar = ({ role = Roles.ADMIN }: NavbarProps) => {
                     <button
                         type="button"
                         onClick={scrollRight}
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 sm:h-9 sm:w-9 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
                     >
-                        <ChevronRight size={20} />
+                        <ChevronRight size={18} />
                     </button>
                 </div>
 
@@ -341,11 +344,13 @@ const Navbar = ({ role = Roles.ADMIN }: NavbarProps) => {
                 <button
                     onClick={handleLogout}
                     type="button"
-                    className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-600 transition hover:bg-red-50 hover:text-red-600 sm:h-auto sm:w-auto sm:gap-2 sm:px-3 sm:py-2 dark:text-gray-400 dark:hover:bg-red-950/30 dark:hover:text-red-400"
                 >
                     <LogOut size={18} />
 
-                    <span className="hidden sm:block">Sign Out</span>
+                    <span className="hidden sm:block text-sm font-medium">
+                        Sign Out
+                    </span>
                 </button>
             </div>
         </nav>
@@ -353,3 +358,4 @@ const Navbar = ({ role = Roles.ADMIN }: NavbarProps) => {
 };
 
 export default Navbar;
+
