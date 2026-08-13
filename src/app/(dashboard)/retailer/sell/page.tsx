@@ -428,15 +428,35 @@ const handleUpdatePost = async (
                                             type="file"
                                             accept="image/*"
                                             className="hidden"
-                                            onChange={(e) => {
-                                                const file = e.target.files?.[0];
+                                            onChange={async (e) => {
+    const file = e.target.files?.[0];
 
-                                                if (!file) return;
+    if (!file) return;
 
-                                                const imageUrl = URL.createObjectURL(file);
+    try {
+        setError("");
 
-                                                setImage(imageUrl);
-                                            }}
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            setError(data.message || "Failed to upload image.");
+            return;
+        }
+
+        setImage(data.url);
+    } catch (error) {
+        console.error(error);
+        setError("Failed to upload image.");
+    }
+}}
                                         />
                                     </label>
 
