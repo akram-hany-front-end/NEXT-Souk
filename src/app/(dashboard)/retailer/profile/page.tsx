@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, } from "react";
 import {
     Pencil,
     Save,
@@ -14,6 +14,7 @@ import {
     Calendar,
     CreditCard,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const cities = [
     "Cairo",
@@ -58,11 +59,12 @@ type UserData = {
 
 
 export default function ProfilePage() {
-const [user, setUser] = useState<UserData | null>(null);
+    const router = useRouter()
+    const [user, setUser] = useState<UserData | null>(null);
     const [isEditing, setIsEditing] = useState(false);
 
     const [form, setForm] = useState({
-        email:"",
+        email: "",
         phone: "",
         city: "",
         password: "",
@@ -70,33 +72,33 @@ const [user, setUser] = useState<UserData | null>(null);
     });
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-// get user From api 
+    // get user From api 
 
-const fetchedUser = async () => {
-    const res = await fetch("/api/register")
-    if (!res.ok) {
-                console.error("Failed to Get user");
-                return;
+    const fetchedUser = async () => {
+        const res = await fetch("/api/profile")
+        if (!res.ok) {
+            console.error("Failed to Get user");
+            return;
+        }
+        const data = await res.json()
+        setUser(data.user)
+        setForm({
+            email: data.user.email,
+            phone: data.user.phone,
+            city: data.user.city,
+            password: "",
+            confirmPassword: "",
+        });
     }
-    const data = await res.json()
-    setUser(data.user)
-   setForm({
-        email: data.user.email,
-        phone: data.user.phone,
-        city: data.user.city,
-        password: "",
-        confirmPassword: "",
-    });
-}
-useEffect(
-    () => {
-const load = async ()=>{
-    await fetchedUser()
-}
-load()
-    }
-    , []
-)
+    useEffect(
+        () => {
+            const load = async () => {
+                await fetchedUser()
+            }
+            load()
+        }
+        , []
+    )
 
 
     const handleChange = (
@@ -110,55 +112,89 @@ load()
         }));
     };
 
-    // const handleSave = () => {
-    //     if (form.password && form.password !== form.confirmPassword) {
-    //         alert("Passwords do not match.");
-    //         return;
-    //     }
 
-    //     setUser((prev) => ({
-    //         ...prev,
-    //         email: form.email,
-    //         phone: form.phone,
-    //         city: form.city,
-    //     }));
 
-    //     setForm((prev) => ({
-    //         ...prev,
-    //         password: "",
-    //         confirmPassword: "",
-    //     }));
 
-    //     setIsEditing(false);
-    // };
 
-    // const handleCancel = () => {
-    //     setForm({
-    //         email: data.user.email,
-    //         phone: user.phone,
-    //         city: user.city,
-    //         password: "",
-    //         confirmPassword: "",
-    //     });
+  const handleSave = async () => {
+    if (form.password && form.password !== form.confirmPassword) {
+        alert("Passwords do not match.");
+        return;
+    }
 
-    //     setIsEditing(false);
-    // };
+    try {
+        const res = await fetch("/api/profile", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                email: form.email,
+                phone: form.phone,
+                city: form.city,
+                password: form.password || undefined,
+            }),
+        });
 
-    const handleDeleteAccount = () => {
-        // API call will be added later.
-        console.log("Delete account");
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.message || "Failed to update profile.");
+            return;
+        }
+
+        setUser(data.user);
+
+        setForm((prev) => ({
+            ...prev,
+            password: "",
+            confirmPassword: "",
+        }));
+
+        setIsEditing(false);
+
+        alert("Profile updated successfully.");
+    } catch (error) {
+        console.error("UPDATE PROFILE ERROR:", error);
+        alert("Something went wrong.");
+    }
+};
+
+
+
+    const handleCancel = () => {
+        setForm({
+            email: form.email,
+            phone: form.phone,
+            city: form.city,
+            password: "",
+            confirmPassword: "",
+        });
+
+        setIsEditing(false);
+    };
+
+    const handleDeleteAccount = async () => {
+        const res = await fetch(("/api/profile"), {
+            method: "DELETE",
+        })
+        if (!res.ok) {
+            alert("couldn't find user! ")
+        }
+        router.push("/login")
+
         setShowDeleteModal(false);
     };
 
-if (!user) {
-    return (
-        <main className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
-            <p className="text-gray-500">
-                Loading profile...
-            </p>
-        </main>
-    );
-}
+    if (!user) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+                <p className="text-gray-500">
+                    Loading profile...
+                </p>
+            </main>
+        );
+    }
     return (
         <main className="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
             <div className="mx-auto max-w-4xl">
@@ -377,23 +413,23 @@ if (!user) {
                         {/* Edit Actions */}
                         {isEditing && (
                             <div className="mt-6 flex justify-end gap-3">
-                                {/* <button
+                                <button
                                     type="button"
                                     onClick={handleCancel}
                                     className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                                 >
                                     <X size={17} />
                                     Cancel
-                                </button> */}
+                                </button>
 
-                                {/* <button
+                                <button
                                     type="button"
                                     onClick={handleSave}
                                     className="flex items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                                 >
                                     <Save size={17} />
                                     Save Changes
-                                </button> */}
+                                </button>
                             </div>
                         )}
                     </div>

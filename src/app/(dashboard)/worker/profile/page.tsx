@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, } from "react";
 import {
     Pencil,
     Save,
@@ -14,6 +14,7 @@ import {
     Calendar,
     CreditCard,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const cities = [
     "Cairo",
@@ -55,30 +56,50 @@ type UserData = {
     role: string;
 };
 
-const initialUser: UserData = {
-    name: "Akram Hany",
-    email: "akram@example.com",
-    phone: "01012345678",
-    city: "Dakahlia",
-    age: "25",
-    nationalId: "29801011234567",
-    role: "Admin",
-};
+
 
 export default function ProfilePage() {
-    const [user, setUser] = useState<UserData>(initialUser);
-
+    const router = useRouter()
+    const [user, setUser] = useState<UserData | null>(null);
     const [isEditing, setIsEditing] = useState(false);
 
     const [form, setForm] = useState({
-        email: user.email,
-        phone: user.phone,
-        city: user.city,
+        email: "",
+        phone: "",
+        city: "",
         password: "",
         confirmPassword: "",
     });
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    // get user From api 
+
+    const fetchedUser = async () => {
+        const res = await fetch("/api/profile")
+        if (!res.ok) {
+            console.error("Failed to Get user");
+            return;
+        }
+        const data = await res.json()
+        setUser(data.user)
+        setForm({
+            email: data.user.email,
+            phone: data.user.phone,
+            city: data.user.city,
+            password: "",
+            confirmPassword: "",
+        });
+    }
+    useEffect(
+        () => {
+            const load = async () => {
+                await fetchedUser()
+            }
+            load()
+        }
+        , []
+    )
+
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -91,18 +112,38 @@ export default function ProfilePage() {
         }));
     };
 
-    const handleSave = () => {
-        if (form.password && form.password !== form.confirmPassword) {
-            alert("Passwords do not match.");
+
+
+
+
+  const handleSave = async () => {
+    if (form.password && form.password !== form.confirmPassword) {
+        alert("Passwords do not match.");
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/profile", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                email: form.email,
+                phone: form.phone,
+                city: form.city,
+                password: form.password || undefined,
+            }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.message || "Failed to update profile.");
             return;
         }
 
-        setUser((prev) => ({
-            ...prev,
-            email: form.email,
-            phone: form.phone,
-            city: form.city,
-        }));
+        setUser(data.user);
 
         setForm((prev) => ({
             ...prev,
@@ -111,13 +152,21 @@ export default function ProfilePage() {
         }));
 
         setIsEditing(false);
-    };
+
+        alert("Profile updated successfully.");
+    } catch (error) {
+        console.error("UPDATE PROFILE ERROR:", error);
+        alert("Something went wrong.");
+    }
+};
+
+
 
     const handleCancel = () => {
         setForm({
-            email: user.email,
-            phone: user.phone,
-            city: user.city,
+            email: form.email,
+            phone: form.phone,
+            city: form.city,
             password: "",
             confirmPassword: "",
         });
@@ -125,12 +174,27 @@ export default function ProfilePage() {
         setIsEditing(false);
     };
 
-    const handleDeleteAccount = () => {
-        // API call will be added later.
-        console.log("Delete account");
+    const handleDeleteAccount = async () => {
+        const res = await fetch(("/api/profile"), {
+            method: "DELETE",
+        })
+        if (!res.ok) {
+            alert("couldn't find user! ")
+        }
+        router.push("/login")
+
         setShowDeleteModal(false);
     };
 
+    if (!user) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+                <p className="text-gray-500">
+                    Loading profile...
+                </p>
+            </main>
+        );
+    }
     return (
         <main className="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
             <div className="mx-auto max-w-4xl">
