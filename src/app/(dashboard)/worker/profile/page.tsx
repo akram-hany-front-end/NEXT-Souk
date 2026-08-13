@@ -100,7 +100,7 @@ export default function ProfilePage() {
         , []
     )
 
-
+// to catch input changes
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
@@ -114,7 +114,7 @@ export default function ProfilePage() {
 
 
 
-
+// to save updated info
 
   const handleSave = async () => {
     if (form.password && form.password !== form.confirmPassword) {
@@ -161,7 +161,8 @@ export default function ProfilePage() {
 };
 
 
-
+// to cancel  changes
+ 
     const handleCancel = () => {
         setForm({
             email: form.email,
@@ -173,7 +174,7 @@ export default function ProfilePage() {
 
         setIsEditing(false);
     };
-
+// to delete account
     const handleDeleteAccount = async () => {
         const res = await fetch(("/api/profile"), {
             method: "DELETE",
