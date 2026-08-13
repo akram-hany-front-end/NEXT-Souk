@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Pencil,
     Save,
@@ -55,30 +55,49 @@ type UserData = {
     role: string;
 };
 
-const initialUser: UserData = {
-    name: "Akram Hany",
-    email: "akram@example.com",
-    phone: "01012345678",
-    city: "Dakahlia",
-    age: "25",
-    nationalId: "29801011234567",
-    role: "Admin",
-};
+
 
 export default function ProfilePage() {
-    const [user, setUser] = useState<UserData>(initialUser);
-
+const [user, setUser] = useState<UserData | null>(null);
     const [isEditing, setIsEditing] = useState(false);
 
     const [form, setForm] = useState({
-        email: user.email,
-        phone: user.phone,
-        city: user.city,
+        email:"",
+        phone: "",
+        city: "",
         password: "",
         confirmPassword: "",
     });
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+// get user From api 
+
+const fetchedUser = async () => {
+    const res = await fetch("/api/register")
+    if (!res.ok) {
+                console.error("Failed to Get user");
+                return;
+    }
+    const data = await res.json()
+    setUser(data.user)
+   setForm({
+        email: data.user.email,
+        phone: data.user.phone,
+        city: data.user.city,
+        password: "",
+        confirmPassword: "",
+    });
+}
+useEffect(
+    () => {
+const load = async ()=>{
+    await fetchedUser()
+}
+load()
+    }
+    , []
+)
+
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -91,39 +110,39 @@ export default function ProfilePage() {
         }));
     };
 
-    const handleSave = () => {
-        if (form.password && form.password !== form.confirmPassword) {
-            alert("Passwords do not match.");
-            return;
-        }
+    // const handleSave = () => {
+    //     if (form.password && form.password !== form.confirmPassword) {
+    //         alert("Passwords do not match.");
+    //         return;
+    //     }
 
-        setUser((prev) => ({
-            ...prev,
-            email: form.email,
-            phone: form.phone,
-            city: form.city,
-        }));
+    //     setUser((prev) => ({
+    //         ...prev,
+    //         email: form.email,
+    //         phone: form.phone,
+    //         city: form.city,
+    //     }));
 
-        setForm((prev) => ({
-            ...prev,
-            password: "",
-            confirmPassword: "",
-        }));
+    //     setForm((prev) => ({
+    //         ...prev,
+    //         password: "",
+    //         confirmPassword: "",
+    //     }));
 
-        setIsEditing(false);
-    };
+    //     setIsEditing(false);
+    // };
 
-    const handleCancel = () => {
-        setForm({
-            email: user.email,
-            phone: user.phone,
-            city: user.city,
-            password: "",
-            confirmPassword: "",
-        });
+    // const handleCancel = () => {
+    //     setForm({
+    //         email: data.user.email,
+    //         phone: user.phone,
+    //         city: user.city,
+    //         password: "",
+    //         confirmPassword: "",
+    //     });
 
-        setIsEditing(false);
-    };
+    //     setIsEditing(false);
+    // };
 
     const handleDeleteAccount = () => {
         // API call will be added later.
@@ -131,6 +150,15 @@ export default function ProfilePage() {
         setShowDeleteModal(false);
     };
 
+if (!user) {
+    return (
+        <main className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+            <p className="text-gray-500">
+                Loading profile...
+            </p>
+        </main>
+    );
+}
     return (
         <main className="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
             <div className="mx-auto max-w-4xl">
@@ -349,23 +377,23 @@ export default function ProfilePage() {
                         {/* Edit Actions */}
                         {isEditing && (
                             <div className="mt-6 flex justify-end gap-3">
-                                <button
+                                {/* <button
                                     type="button"
                                     onClick={handleCancel}
                                     className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                                 >
                                     <X size={17} />
                                     Cancel
-                                </button>
+                                </button> */}
 
-                                <button
+                                {/* <button
                                     type="button"
                                     onClick={handleSave}
                                     className="flex items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                                 >
                                     <Save size={17} />
                                     Save Changes
-                                </button>
+                                </button> */}
                             </div>
                         )}
                     </div>

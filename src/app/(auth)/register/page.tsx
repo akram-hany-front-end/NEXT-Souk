@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 
 import { Role, Roles } from "@/lib/roles";
-
+import { useRouter } from "next/navigation";
 type RegisterForm = {
     city: string;
     name: string;
@@ -50,6 +50,7 @@ const governorates = [
 const roleOptions = Object.values(Roles).filter((role) => role );
 
 export default function Page() {
+        const router = useRouter();
     const [form, setForm] = useState<RegisterForm>({
         city: "",
         name: "",
@@ -143,7 +144,7 @@ export default function Page() {
         }
 
         setSuccess("Account created successfully.");
-
+router.push("/login")
         // Reset form
         setForm({
             city: "",

@@ -37,16 +37,13 @@ export async function proxy(request: NextRequest) {
     }
 
     const allowedRoute = roleRoutes[role];
-    console.log("ALLOWED ROUTE:", allowedRoute);
 
     const isAllowed =
         pathname === allowedRoute ||
         pathname.startsWith(`${allowedRoute}/`);
 
-    console.log("IS ALLOWED:", isAllowed);
 
     if (!isAllowed) {
-        console.log(`BLOCKED: ${pathname} -> ${allowedRoute}`);
         return NextResponse.redirect(new URL(allowedRoute, request.url));
     }
 
