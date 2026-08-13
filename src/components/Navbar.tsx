@@ -8,7 +8,6 @@ import {
     Search,
     ShoppingBag,
     CircleUserRound,
-    LogOut,
     Factory,
     Users,
     Truck,
@@ -17,10 +16,10 @@ import {
     BriefcaseBusiness,
     Mail,
 } from "lucide-react";
-import { signOut } from "next-auth/react";
-import { Roles } from "@/lib/roles";
 import Image from "next/image";
 import Link from "next/link";
+import Logout from "./Logout";
+import { Roles, type Role } from "@/lib/roles";
 
 export const adminLinks = [
     {
@@ -226,11 +225,21 @@ export const workerLinks = [
     },
 ];
 
+const roleLinks: Record<Role, typeof adminLinks> = {
+    [Roles.ADMIN]: adminLinks,
+    [Roles.FACTORY]: factoryLinks,
+    [Roles.RETAILER]: retailerLinks,
+    [Roles.RMD]: rmdLinks,
+    [Roles.SHIPPER]: shipperLinks,
+    [Roles.WHOLESALER]: wholesalerLinks,
+    [Roles.WORKER]: workerLinks,
+    [Roles.USER]: userLinks,
+};
 type NavbarProps = {
-    role?: string;
+    role?: Role;
 };
 
-const Navbar = ({ role = Roles.FACTORY }: NavbarProps) => {
+const Navbar = ({ role }: NavbarProps) => {
     const navRef = useRef<HTMLDivElement>(null);
 
     const scrollLeft = () => {
@@ -247,28 +256,10 @@ const Navbar = ({ role = Roles.FACTORY }: NavbarProps) => {
         });
     };
 
-    const handleLogout = async () => {
-        // await signOut({
-        //     callbackUrl: "/sign-in",
-        // });
-    };
 
-    const menuItems =
-        role === Roles.ADMIN
-            ? adminLinks
-            : role === Roles.FACTORY
-                ? factoryLinks
-                : role === Roles.RETAILER
-                    ? retailerLinks
-                    : role === Roles.RMD
-                        ? rmdLinks
-                        : role === Roles.SHIPPER
-                            ? shipperLinks
-                            : role === Roles.WHOLESALER
-                                ? wholesalerLinks
-                                : role === Roles.WORKER
-                                    ? workerLinks
-                                    : userLinks;
+const menuItems = role
+    ? roleLinks[role]
+    : [];
 
     return (
         <nav className="w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
@@ -341,18 +332,8 @@ const Navbar = ({ role = Roles.FACTORY }: NavbarProps) => {
                     </button>
                 </div>
 
-                {/* Logout */}
-                <button
-                    onClick={handleLogout}
-                    type="button"
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-600 transition hover:bg-red-50 hover:text-red-600 sm:h-auto sm:w-auto sm:gap-2 sm:px-3 sm:py-2 dark:text-gray-400 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                >
-                    <LogOut size={18} />
-
-                    <span className="hidden sm:block text-sm font-medium">
-                        Sign Out
-                    </span>
-                </button>
+                {/* Logout button*/}
+                <Logout />
             </div>
         </nav>
     );

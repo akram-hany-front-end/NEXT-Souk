@@ -3,8 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
 import User from "@/models/User";
-import clientPromise from "@/lib/mongodb";
-
+import { connectDB } from "@/lib/mongoose";
 export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
@@ -24,85 +23,76 @@ export const authOptions: NextAuthOptions = {
                     type: "text",
                 },
             },
+async authorize(credentials) {
+    console.log("CREDENTIALS:", credentials);
 
-            async authorize(credentials) {
-                console.log("CREDENTIALS:", credentials);
+    if (!credentials) {
+        console.log("NO CREDENTIALS");
+        return null;
+    }
 
-                if (!credentials) {
-                    console.log("NO CREDENTIALS");
-                    return null;
-                }
+    await connectDB();
 
-                await clientPromise;
+    console.log("MONGOOSE CONNECTED");
 
-                const email = String(credentials.email ?? "")
-                    .trim()
-                    .toLowerCase();
+    const email = String(credentials.email ?? "")
+        .trim()
+        .toLowerCase();
 
-                const password = String(credentials.password ?? "");
+    const password = String(credentials.password ?? "");
 
-                const nationalId = String(credentials.nationalId ?? "")
-                    .trim();
+    const nationalId = String(credentials.nationalId ?? "")
+        .trim();
 
-                console.log(
-                    "SEARCH EMAIL:",
-                    JSON.stringify(email)
-                );
+    console.log("SEARCH EMAIL:", JSON.stringify(email));
+    console.log("SEARCH NATIONAL ID:", JSON.stringify(nationalId));
 
-                console.log(
-                    "SEARCH NATIONAL ID:",
-                    JSON.stringify(nationalId)
-                );
+    if (!email || !password || !nationalId) {
+        console.log("MISSING DATA");
+        return null;
+    }
 
-                if (!email || !password || !nationalId) {
-                    console.log("MISSING DATA");
-                    return null;
-                }
+    console.log("BEFORE USER FIND");
 
-                const user = await User.findOne({
-                    email,
-                    nationalId,
-                });
+    const user = await User.findOne({
+        email,
+        nationalId,
+    });
 
-                console.log("USER FOUND:", !!user);
+    console.log("AFTER USER FIND");
+    console.log("USER FOUND:", !!user);
 
-                if (!user) {
-                    console.log("USER NOT FOUND");
-                    return null;
-                }
+    if (!user) {
+        console.log("USER NOT FOUND");
+        return null;
+    }
 
-                console.log("USER EMAIL:", user.email);
-                console.log("USER ROLE:", user.role);
-                console.log(
-                    "PASSWORD HASH EXISTS:",
-                    !!user.password
-                );
+    console.log("USER EMAIL:", user.email);
+    console.log("USER ROLE:", user.role);
+    console.log("PASSWORD HASH EXISTS:", !!user.password);
 
-                const isPasswordCorrect = await bcrypt.compare(
-                    password,
-                    user.password
-                );
+    const isPasswordCorrect = await bcrypt.compare(
+        password,
+        user.password
+    );
 
-                console.log(
-                    "PASSWORD CORRECT:",
-                    isPasswordCorrect
-                );
+    console.log("PASSWORD CORRECT:", isPasswordCorrect);
 
-                if (!isPasswordCorrect) {
-                    console.log("WRONG PASSWORD");
-                    return null;
-                }
+    if (!isPasswordCorrect) {
+        console.log("WRONG PASSWORD");
+        return null;
+    }
 
-                console.log("LOGIN SUCCESS");
+    console.log("LOGIN SUCCESS");
 
-                return {
-                    id: user._id.toString(),
-                    name: user.name,
-                    email: user.email,
-                    role: user.role,
-                    nationalId: user.nationalId,
-                };
-            },
+    return {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        nationalId: user.nationalId,
+    };
+}
         }),
     ],
 

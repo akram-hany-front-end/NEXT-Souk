@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
 import "../globals.css";
-import Navbar from "@/components/Navbar";
-
+import NavbarWrapper from "@/components/NavbarWrapper";
+import Providers from "@/components/Providers";
 export const metadata: Metadata = {
   title: "Souq",
   description: "Souq Platform",
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
+  return (<Providers>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <Navbar />
-
+      <NavbarWrapper />
       <main>{children}</main>
     </div>
+  </Providers>
+
   );
 }

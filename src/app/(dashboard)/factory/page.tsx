@@ -71,6 +71,7 @@ export default function MarketsPage() {
     return (
         <main className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 lg:px-8 dark:bg-gray-950">
             <div className="mx-auto max-w-7xl">
+                <h1 className="text-white">shit</h1>
                 {/* Header */}
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">

@@ -32,8 +32,7 @@ export default function Page() {
     const [success, setSuccess] = useState("");
 
 
-
-
+    // Handle Change function 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     ) => {
@@ -48,7 +47,7 @@ export default function Page() {
         setSuccess("");
     };
 
-    // Handle submit
+    // Handle submit function 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -69,44 +68,41 @@ export default function Page() {
             return;
         }
 
-        try {
-            console.log("FORM EMAIL:", JSON.stringify(form.email));
-            console.log("FORM PASSWORD:", JSON.stringify(form.password));
-            console.log("FORM NATIONAL ID:", JSON.stringify(form.nationalId));
-            const result = await signIn("credentials", {
-                email,
-                password,
-                nationalId,
-                redirect: false,
-            });
+      try {
+    const result = await signIn("credentials", {
+        email,
+        password,
+        nationalId,
+        redirect: false,
+    });
 
-            console.log("SIGN IN RESULT:", result);
-if (!result || result.error) {
-    setError("Invalid email, password, or national ID.");
-    return;
+    if (!result || result.error) {
+        setError("Invalid email, password, or national ID.");
+        return;
+    }
+
+    const session = await getSession();
+
+    const role = session?.user?.role as Role | undefined;
+
+    if (!role) {
+        setError("Unable to determine your account role.");
+        return;
+    }
+
+    const redirectPath = roleRoutes[role];
+
+    if (!redirectPath) {
+        setError("Invalid account role.");
+        return;
+    }
+
+    window.location.href = redirectPath;
+
+} catch (error) {
+    console.error("LOGIN ERROR:", error);
+    setError("Unable to connect to the server.");
 }
-
-const session = await getSession();
-
-if (!session?.user?.role) {
-    setError("Unable to determine your account role.");
-    return;
-}
-
-const role = session.user.role as Role;
-const redirectPath = roleRoutes[role];
-
-if (!redirectPath) {
-    setError("Invalid account role.");
-    return;
-}
-
-window.location.href = redirectPath;
-            console.log("Login successful");
-        } catch (error) {
-            console.error("LOGIN ERROR:", error);
-            setError("Unable to connect to the server.");
-        }
     };
     return (
         <main className="min-h-screen bg-gray-50 px-4 py-10 dark:bg-gray-950">
