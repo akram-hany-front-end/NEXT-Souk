@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import {
     CheckCircle2,
     Clock3,
@@ -14,7 +14,7 @@ import Image from "next/image";
 type PostStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 type Post = {
-    id: number;
+    _id: string;
     title: string;
     description: string;
     price: string;
@@ -22,35 +22,6 @@ type Post = {
     status: PostStatus;
     rejectionReason?: string;
 };
-
-const initialPosts: Post[] = [
-    {
-        id: 1,
-        title: "Premium Iron",
-        description: "High-quality iron raw material.",
-        price: "5000",
-        image: "",
-        status: "PENDING",
-    },
-    {
-        id: 2,
-        title: "Steel Materials",
-        description: "High-quality steel materials for factories.",
-        price: "8500",
-        image: "",
-        status: "REJECTED",
-        rejectionReason:
-            "Please provide more information about the product.",
-    },
-    {
-        id: 3,
-        title: "Copper Materials",
-        description: "Premium copper materials.",
-        price: "12000",
-        image: "",
-        status: "APPROVED",
-    },
-];
 
 const statusConfig = {
     PENDING: {
@@ -74,8 +45,9 @@ const statusConfig = {
 };
 
 export default function SellPage() {
-    const [posts, setPosts] = useState<Post[]>(initialPosts);
-
+const [posts, setPosts] = useState<Post[]>([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
@@ -83,64 +55,144 @@ export default function SellPage() {
 
     const [editingPost, setEditingPost] = useState<Post | null>(null);
 
-    const handleCreatePost = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+  const handleCreatePost = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-        if (!title.trim() || !description.trim() || !price.trim()) {
+    if (!title.trim() || !description.trim() || !price.trim()) {
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/post", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                title: title.trim(),
+                description: description.trim(),
+                price: Number(price),
+                image,
+            }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            setError(data.message || "Failed to create post.");
             return;
         }
 
-        const newPost: Post = {
-            id: Date.now(),
-            title: title.trim(),
-            description: description.trim(),
-            price: price.trim(),
-            image: image.trim(),
-            status: "PENDING",
-        };
+        setPosts((prev) => [data.post, ...prev]);
 
-        setPosts((prev) => [newPost, ...prev]);
-
+        // Reset form
         setTitle("");
         setDescription("");
         setPrice("");
         setImage("");
-    };
+        setError("");
+    } catch (error) {
+        console.error(error);
+        setError("Something went wrong.");
+    }
+};
+  const handleDelete = async (id: string) => {
+    try {
+        const res = await fetch(`/api/post/${id}`, {
+            method: "DELETE",
+        });
 
-    const handleDelete = (id: number) => {
-        setPosts((prev) => prev.filter((post) => post.id !== id));
-    };
+        const data = await res.json();
+
+        if (!res.ok) {
+            setError(data.message || "Failed to delete post.");
+            return;
+        }
+
+        setPosts((prev) =>
+            prev.filter((post) => post._id !== id)
+        );
+    } catch (error) {
+        console.error(error);
+        setError("Failed to delete post.");
+    }
+};
 
     const handleEdit = (post: Post) => {
         setEditingPost({ ...post });
     };
 
-    const handleUpdatePost = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+const handleUpdatePost = async (
+    e: FormEvent<HTMLFormElement>
+) => {
+    e.preventDefault();
 
-        if (!editingPost) return;
+    if (!editingPost) return;
+
+    try {
+        const res = await fetch(
+            `/api/post/${editingPost._id}`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    title: editingPost.title,
+                    description: editingPost.description,
+                    price: Number(editingPost.price),
+                    image: editingPost.image,
+                }),
+            }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            setError(data.message || "Failed to update post.");
+            return;
+        }
 
         setPosts((prev) =>
             prev.map((post) =>
-                post.id === editingPost.id
-                    ? {
-                        ...editingPost,
-                        status:
-                            post.status === "REJECTED"
-                                ? "PENDING"
-                                : post.status,
-                        rejectionReason:
-                            post.status === "REJECTED"
-                                ? undefined
-                                : post.rejectionReason,
-                    }
+                post._id === editingPost._id
+                    ? data.post
                     : post
             )
         );
 
         setEditingPost(null);
+        setError("");
+    } catch (error) {
+        console.error(error);
+        setError("Failed to update post.");
+    }
+};
+
+    useEffect(() => {
+    const fetchPosts = async () => {
+        try {
+            setLoading(true);
+
+            const res = await fetch("/api/post");
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch posts");
+            }
+
+            const data = await res.json();
+
+            setPosts(data.posts);
+        } catch (error) {
+            console.error(error);
+            setError("Failed to load posts.");
+        } finally {
+            setLoading(false);
+        }
     };
 
+    fetchPosts();
+}, []);
     return (
         <main className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 lg:px-8 dark:bg-gray-950">
             <div className="mx-auto max-w-7xl">
@@ -186,7 +238,7 @@ export default function SellPage() {
 
                                     return (
                                         <div
-                                            key={post.id}
+                                            key={post._id}
                                             className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900"
                                         >
                                             {/* Post Header */}
@@ -256,7 +308,7 @@ export default function SellPage() {
                                                             type="button"
                                                             onClick={() =>
                                                                 handleDelete(
-                                                                    post.id
+                                                                    post._id
                                                                 )
                                                             }
                                                             className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"

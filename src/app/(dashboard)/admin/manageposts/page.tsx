@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     CheckCircle2,
     Clock3,
@@ -13,49 +13,20 @@ import Image from "next/image";
 type PostStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 type Post = {
-    id: number;
+    _id: string;
     title: string;
     description: string;
-    price: string;
+    price: number;
     image: string;
-    ownerName: string;
-    ownerRole: string;
+    user: {
+        email: string;
+        name: string;
+        role: string;
+    };
+
     status: PostStatus;
     rejectionReason?: string;
 };
-
-const initialPosts: Post[] = [
-    {
-        id: 1,
-        title: "Premium Iron",
-        description: "High-quality iron raw material.",
-        price: "5000",
-        image: "",
-        ownerName: "Ahmed Ali",
-        ownerRole: "RMD",
-        status: "PENDING",
-    },
-    {
-        id: 2,
-        title: "Fresh Vegetables",
-        description: "Fresh vegetables available for wholesale.",
-        price: "3000",
-        image: "",
-        ownerName: "Mohamed Hassan",
-        ownerRole: "Wholesaler",
-        status: "PENDING",
-    },
-    {
-        id: 3,
-        title: "Delivery Service",
-        description: "Fast delivery service with motorcycle.",
-        price: "500",
-        image: "",
-        ownerName: "Omar Khaled",
-        ownerRole: "Shipper",
-        status: "PENDING",
-    },
-];
 
 const statusConfig = {
     PENDING: {
@@ -73,59 +44,120 @@ const statusConfig = {
     REJECTED: {
         label: "Rejected",
         icon: XCircle,
-        className:
-            "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400",
+        className: "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400",
     },
 };
 
 export default function ManageRequestsPage() {
-    const [posts, setPosts] = useState<Post[]>(initialPosts);
-
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
     const [rejectingPost, setRejectingPost] = useState<Post | null>(null);
     const [rejectionReason, setRejectionReason] = useState("");
 
-    const handleApprove = (id: number) => {
-        setPosts((prev) =>
-            prev.map((post) =>
-                post.id === id
-                    ? {
-                        ...post,
-                        status: "APPROVED",
-                        rejectionReason: undefined,
-                    }
-                    : post
-            )
-        );
-    };
+  const handleApprove = async (id: string) => {
+    try {
+        const res = await fetch(`/api/post/${id}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                status: "APPROVED",
+            }),
+        });
 
+        const data = await res.json();
+
+        if (!res.ok) {
+            setError(data.message || "Failed to approve request.");
+            return;
+        }
+
+        // Remove approved post from pending requests
+        setPosts((prev) =>
+            prev.filter((post) => post._id !== id)
+        );
+
+        setError("");
+    } catch (error) {
+        console.error(error);
+        setError("Failed to approve request.");
+    }
+};
     const handleOpenReject = (post: Post) => {
         setRejectingPost(post);
         setRejectionReason("");
     };
 
-    const handleReject = () => {
-        if (!rejectingPost || !rejectionReason.trim()) return;
+    const handleReject = async () => {
+    if (!rejectingPost || !rejectionReason.trim()) return;
 
+    try {
+        const res = await fetch(
+            `/api/post/${rejectingPost._id}`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    status: "REJECTED",
+                    rejectionReason: rejectionReason.trim(),
+                }),
+            }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            setError(
+                data.message || "Failed to reject request."
+            );
+            return;
+        }
+
+        // Remove rejected post from pending requests
         setPosts((prev) =>
-            prev.map((post) =>
-                post.id === rejectingPost.id
-                    ? {
-                        ...post,
-                        status: "REJECTED",
-                        rejectionReason: rejectionReason.trim(),
-                    }
-                    : post
+            prev.filter(
+                (post) => post._id !== rejectingPost._id
             )
         );
 
         setRejectingPost(null);
         setRejectionReason("");
-    };
+        setError("");
+    } catch (error) {
+        console.error(error);
+        setError("Failed to reject request.");
+    }
+};
+    useEffect(() => {
+        const fetchRequests = async () => {
+            try {
+                setLoading(true);
 
+                const res = await fetch("/api/requests");
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || "Failed to fetch requests");
+                }
+
+                setPosts(data.posts);
+            } catch (error) {
+                console.error(error);
+                setError("Failed to load requests.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchRequests();
+    }, []);
     return (
         <main className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 lg:px-8 dark:bg-gray-950">
             <div className="mx-auto max-w-7xl">
-
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
@@ -152,14 +184,12 @@ export default function ManageRequestsPage() {
 
                             return (
                                 <div
-                                    key={post.id}
+                                    key={post._id}
                                     className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
                                 >
                                     <div className="p-5 sm:p-6">
-
                                         {/* Top */}
                                         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-
                                             {/* Image */}
                                             <div className="flex gap-4">
                                                 <div className="flex h-[60px] w-[60px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
@@ -172,10 +202,7 @@ export default function ManageRequestsPage() {
                                                             className="h-[60px] w-[60px] object-cover"
                                                         />
                                                     ) : (
-                                                        <ImageIcon
-                                                            size={24}
-                                                            className="text-gray-400"
-                                                        />
+                                                        <ImageIcon size={24} className="text-gray-400" />
                                                     )}
                                                 </div>
 
@@ -202,14 +229,13 @@ export default function ManageRequestsPage() {
 
                                         {/* Details */}
                                         <div className="mt-6 grid grid-cols-2 gap-4 border-t border-gray-100 pt-5 sm:grid-cols-4 dark:border-gray-800">
-
                                             <div>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                                     Owner
                                                 </p>
 
                                                 <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
-                                                    {post.ownerName}
+                                                    {post.user.name}
                                                 </p>
                                             </div>
 
@@ -219,7 +245,7 @@ export default function ManageRequestsPage() {
                                                 </p>
 
                                                 <span className="mt-1 inline-flex rounded-md bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                                                    {post.ownerRole}
+                                                    {post.user.role}
                                                 </span>
                                             </div>
 
@@ -239,34 +265,30 @@ export default function ManageRequestsPage() {
                                                 </p>
 
                                                 <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
-                                                    #{post.id}
+                                                    #{post._id}
                                                 </p>
                                             </div>
                                         </div>
 
                                         {/* Rejection Reason */}
-                                        {post.status === "REJECTED" &&
-                                            post.rejectionReason && (
-                                                <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/20">
-                                                    <p className="text-xs font-semibold text-red-700 dark:text-red-400">
-                                                        Rejection Reason
-                                                    </p>
+                                        {post.status === "REJECTED" && post.rejectionReason && (
+                                            <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/20">
+                                                <p className="text-xs font-semibold text-red-700 dark:text-red-400">
+                                                    Rejection Reason
+                                                </p>
 
-                                                    <p className="mt-1 text-sm text-red-600 dark:text-red-300">
-                                                        {post.rejectionReason}
-                                                    </p>
-                                                </div>
-                                            )}
+                                                <p className="mt-1 text-sm text-red-600 dark:text-red-300">
+                                                    {post.rejectionReason}
+                                                </p>
+                                            </div>
+                                        )}
 
                                         {/* Actions */}
                                         {post.status === "PENDING" && (
                                             <div className="mt-6 flex flex-col gap-2 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end dark:border-gray-800">
-
                                                 <button
                                                     type="button"
-                                                    onClick={() =>
-                                                        handleOpenReject(post)
-                                                    }
+                                                    onClick={() => handleOpenReject(post)}
                                                     className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
                                                 >
                                                     <XCircle size={17} />
@@ -275,9 +297,7 @@ export default function ManageRequestsPage() {
 
                                                 <button
                                                     type="button"
-                                                    onClick={() =>
-                                                        handleApprove(post.id)
-                                                    }
+                                                    onClick={() => handleApprove(post._id)}
                                                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
                                                 >
                                                     <CheckCircle2 size={17} />
@@ -297,7 +317,6 @@ export default function ManageRequestsPage() {
             {rejectingPost && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
                     <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900">
-
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                                 Reject Request
@@ -320,9 +339,7 @@ export default function ManageRequestsPage() {
                                 id="rejectionReason"
                                 rows={5}
                                 value={rejectionReason}
-                                onChange={(e) =>
-                                    setRejectionReason(e.target.value)
-                                }
+                                onChange={(e) => setRejectionReason(e.target.value)}
                                 placeholder="Write the reason for rejecting this request..."
                                 className="w-full resize-none rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
                             />
