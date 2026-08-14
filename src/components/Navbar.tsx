@@ -15,6 +15,7 @@ import {
     Store,
     BriefcaseBusiness,
     Mail,
+    Building2,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,6 +34,11 @@ export const adminLinks = [
         icon: Mail,
     },
     {
+        title: "Factory owners",
+        href: "/admin/factoryowners",
+        icon: Factory,
+    },
+    {
         title: "Retailers",
         href: "/admin/retailers",
         icon: Users,
@@ -40,7 +46,7 @@ export const adminLinks = [
     {
         title: "RMDs",
         href: "/admin/rmds",
-        icon: Factory,
+        icon: Building2,
     },
     {
         title: "Shippers",
@@ -267,19 +273,18 @@ const menuItems = role
 
                 {/* Logo */}
                 <Link
-                    href="/"
+                    href=""
                     className="flex shrink-0 items-center gap-2 sm:gap-3"
                 >
-                    {/* <Image
+                    <Image
                         src="/logo.png"
                         alt="Souq Logo"
-                        width={38}
-                        height={38}
-                    /> */}
+                        width={40}
+                        height={40}
+                        className="rounded-full bg-transparent"
+                    />
 
-                    <span className="hidden text-xl font-bold text-gray-900 sm:block dark:text-white">
-                        Souq
-                    </span>
+                
                 </Link>
 
                 {/* Navigation */}

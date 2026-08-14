@@ -24,7 +24,7 @@ export default function AboutPage() {
     const itemsPerPage = 5;
 
     // =========================
-    // GET RMD
+    // GET FACTORY
     // =========================
 
     useEffect(() => {
@@ -34,22 +34,22 @@ export default function AboutPage() {
                 setError("");
 
                 const res = await fetch(
-                    "/api/users?role=RMD"
+                    "/api/users?role=FACTORY"
                 );
 
                 const data = await res.json();
 
                 if (!res.ok) {
                     throw new Error(
-                        data.message || "Failed to fetch rmds."
+                        data.message || "Failed to fetch FACTORY."
                     );
                 }
 
                 setUsers(data.users || []);
             } catch (error) {
-                console.error("FETCH rmds ERROR:", error);
+                console.error("FETCH FACTORY ERROR:", error);
 
-                setError("Failed to load rmds.");
+                setError("Failed to load FACTORY.");
                 setUsers([]);
             } finally {
                 setLoading(false);
@@ -151,11 +151,11 @@ export default function AboutPage() {
                 {/* Header */}
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-                        Rmds
+                        FACTORY owners
                     </h1>
 
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Manage registered Rmds and their information.
+                        Manage registered FACTORY owners and their information.
                     </p>
                 </div>
 
@@ -180,7 +180,7 @@ export default function AboutPage() {
                             onChange={(e) =>
                                 handleSearch(e.target.value)
                             }
-                            placeholder="Search Rmds..."
+                            placeholder="Search FACTORY owners..."
                             className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-black focus:ring-2 focus:ring-black/10 dark:border-gray-800 dark:bg-gray-900 dark:text-white dark:focus:border-white"
                         />
                     </div>
@@ -190,7 +190,7 @@ export default function AboutPage() {
                 {loading ? (
                     <div className="rounded-2xl border border-gray-200 bg-white px-4 py-12 text-center dark:border-gray-800 dark:bg-gray-900">
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Loading Rmds...
+                            Loading FACTORY owners...
                         </p>
                     </div>
                 ) : (
@@ -361,7 +361,7 @@ export default function AboutPage() {
                         {currentUsers.length === 0 && (
                             <div className="rounded-2xl border border-gray-200 bg-white px-4 py-12 text-center dark:border-gray-800 dark:bg-gray-900">
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    No Rmds found.
+                                    No FACTORY owners found.
                                 </p>
                             </div>
                         )}
