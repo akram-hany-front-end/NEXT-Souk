@@ -57,7 +57,7 @@ export default function ManageRequestsPage() {
 
   const handleApprove = async (id: string) => {
     try {
-        const res = await fetch(`/api/post/${id}`, {
+        const res = await fetch(`/api/requests/${id}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -95,7 +95,7 @@ export default function ManageRequestsPage() {
 
     try {
         const res = await fetch(
-            `/api/post/${rejectingPost._id}`,
+            `/api/requests/${rejectingPost._id}`,
             {
                 method: "PATCH",
                 headers: {

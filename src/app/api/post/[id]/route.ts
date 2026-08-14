@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import Post from "@/models/Post";
+import User from "@/models/User";
 import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/mongoose";
 
@@ -39,13 +40,32 @@ export async function PATCH(
             image,
         } = body;
 
-        const post = await Post.findById(id);
+        // Find current user
+        const user = await User.findOne({
+            email: session.user.email,
+        });
+
+        if (!user) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "User not found.",
+                },
+                { status: 404 }
+            );
+        }
+
+        // Find post owned by current user
+        const post = await Post.findOne({
+            _id: id,
+            user: user._id,
+        });
 
         if (!post) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Post not found.",
+                    message: "Post not found or you are not the owner.",
                 },
                 { status: 404 }
             );
@@ -68,17 +88,21 @@ export async function PATCH(
             post.image = image;
         }
 
+        // Any edit requires admin review again
+        post.status = "PENDING";
+        post.rejectionReason = undefined;
+
         await post.save();
 
         return NextResponse.json(
             {
                 success: true,
-                message: "Post updated successfully.",
+                message:
+                    "Post updated successfully and is pending review.",
                 post,
             },
             { status: 200 }
         );
-
     } catch (error) {
         console.error("PATCH POST ERROR:", error);
 
@@ -91,7 +115,6 @@ export async function PATCH(
         );
     }
 }
-
 
 // =========================
 // DELETE POST

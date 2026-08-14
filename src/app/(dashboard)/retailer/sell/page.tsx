@@ -291,7 +291,7 @@ const handleUpdatePost = async (
 
                                             {/* Actions */}
                                             {(post.status === "PENDING" ||
-                                                post.status === "REJECTED") && (
+                                                post.status === "REJECTED" || post.status === "APPROVED") && (
                                                     <div className="mt-5 flex items-center justify-end gap-2 border-t border-gray-100 pt-4 dark:border-gray-800">
                                                         <button
                                                             type="button"
