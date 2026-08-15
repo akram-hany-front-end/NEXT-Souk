@@ -10,6 +10,7 @@ type LoginForm = {
     password: string;
     nationalId: string;
 };
+
 const roleRoutes: Record<Role, string> = {
     [Roles.ADMIN]: "/admin",
     [Roles.FACTORY]: "/factory",
@@ -80,6 +81,7 @@ export default function Page() {
         setError("Invalid email, password, or national ID.");
         return;
     }
+console.log(result)
 
     const session = await getSession();
 
@@ -104,6 +106,7 @@ export default function Page() {
     setError("Unable to connect to the server.");
 }
     };
+
     return (
         <main className="min-h-screen bg-gray-50 px-4 py-10 dark:bg-gray-950">
             <div className="mx-auto w-lg max-w-3xl">
