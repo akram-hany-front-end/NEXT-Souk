@@ -173,7 +173,7 @@ router.push("/login")
                     </h1>
 
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Join Souq and start using the platform
+                        Join Connected and start using the platform
                     </p>
                 </div>
 
