@@ -47,7 +47,7 @@ const governorates = [
     "South Sinai",
 ];
 
-const roleOptions = Object.values(Roles).filter((role) => role );
+const roleOptions = Object.values(Roles).filter((role) => role!== "ADMIN" );
 
 export default function Page() {
         const router = useRouter();
