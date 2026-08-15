@@ -91,15 +91,18 @@ export async function POST(request: Request) {
             },
             { status: 201 }
         );
-    } catch (error) {
-        console.error("Register Error:", error);
+   } catch (error) {
+    console.error("REGISTER ERROR:", error);
 
-        return NextResponse.json(
-            {
-                success: false,
-                message: "Something went wrong",
-            },
-            { status: 500 }
-        );
-    }
+    return NextResponse.json(
+        {
+            success: false,
+            message:
+                error instanceof Error
+                    ? error.message
+                    : "Something went wrong",
+        },
+        { status: 500 }
+    );
+}
 }
