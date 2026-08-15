@@ -10,65 +10,76 @@ import {
     ShoppingBag,
     UserRound,
 } from "lucide-react";
+import { useEffect, useState, use } from "react";
+
+type PostStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 type Post = {
-    id: number;
+    _id: string;
     title: string;
     description: string;
-    price: string;
+    price: number;
     image: string;
-    role: string;
-    seller: {
+    status: PostStatus;
+    user: {
         name: string;
         email: string;
         phone: string;
         city: string;
+        role: string;
     };
 };
 
-const posts: Post[] = [
-    {
-        id: 1,
-        title: "Premium Iron",
-        description:
-            "High-quality iron raw material suitable for factories and industrial use.",
-        price: "5000",
-        image: "",
-        role: "Factory",
-        seller: {
-            name: "Ahmed Ali",
-            email: "ahmed@example.com",
-            phone: "01012345678",
-            city: "Cairo",
-        },
-    },
-    {
-        id: 2,
-        title: "Steel Materials",
-        description:
-            "High-quality steel materials available for wholesale and industrial use.",
-        price: "8500",
-        image: "",
-        role: "Wholesaler",
-        seller: {
-            name: "Mohamed Hassan",
-            email: "mohamed@example.com",
-            phone: "01123456789",
-            city: "Dakahlia",
-        },
-    },
-];
-
 type ContactPageProps = {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 };
 
 export default function ContactPage({ params }: ContactPageProps) {
-    const post = posts.find((item) => item.id === Number(params.id));
+    const [post, setPost] = useState<Post | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const { id } = use(params);
+    useEffect(() => {
+        const fetchPost = async () => {
+            try {
+                setLoading(true);
+                setError("");
 
-    if (!post) {
+                const res = await fetch(`/api/post/${id}`);
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(
+                        data.message || "Failed to fetch post."
+                    );
+                }
+
+                setPost(data.post);
+            } catch (error) {
+                console.error("FETCH POST ERROR:", error);
+                setError("Failed to load post.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPost();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Loading post...
+                </p>
+            </main>
+        );
+    }
+
+    if (error || !post) {
         return (
             <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-950">
                 <div className="text-center">
@@ -77,7 +88,7 @@ export default function ContactPage({ params }: ContactPageProps) {
                     </h1>
 
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                        The post you are looking for does not exist.
+                        {error || "The post you are looking for does not exist."}
                     </p>
 
                     <Link
@@ -91,14 +102,37 @@ export default function ContactPage({ params }: ContactPageProps) {
             </main>
         );
     }
+    const getSearchPath = (role: string) => {
+        switch (role) {
+            case "RETAILER":
+                return "/retailer/search";
 
+            case "RMD":
+                return "/rmd/search";
+
+            case "FACTORY":
+                return "/factory/search";
+
+            case "WHOLESALER":
+                return "/wholesaler/search";
+
+            case "SHIPPER":
+                return "/shipper/search";
+
+            case "WORKER":
+                return "/worker/search";
+
+            default:
+                return "/user/search";
+        }
+    };
     return (
         <main className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 lg:px-8 dark:bg-gray-950">
             <div className="mx-auto max-w-5xl">
 
                 {/* Back */}
                 <Link
-                    href="/search"
+                    href={getSearchPath(post.user.role)}
                     className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-black dark:text-gray-400 dark:hover:text-white"
                 >
                     <ArrowLeft size={18} />
@@ -107,7 +141,7 @@ export default function ContactPage({ params }: ContactPageProps) {
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-                    {/* ================= POST ================= */}
+                    {/* POST */}
                     <section className="lg:col-span-2">
                         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
 
@@ -134,7 +168,7 @@ export default function ContactPage({ params }: ContactPageProps) {
 
                                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                                     <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
-                                        {post.role}
+                                        {post.user.role}
                                     </span>
 
                                     <span className="text-xl font-bold text-gray-900 dark:text-white">
@@ -159,7 +193,7 @@ export default function ContactPage({ params }: ContactPageProps) {
                         </div>
                     </section>
 
-                    {/* ================= SELLER ================= */}
+                    {/* SELLER */}
                     <section>
                         <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
 
@@ -188,7 +222,7 @@ export default function ContactPage({ params }: ContactPageProps) {
                                     </p>
 
                                     <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
-                                        {post.seller.name}
+                                        {post.user.name}
                                     </p>
                                 </div>
                             </div>
@@ -208,7 +242,7 @@ export default function ContactPage({ params }: ContactPageProps) {
                                     </p>
 
                                     <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
-                                        {post.role}
+                                        {post.user.role}
                                     </p>
                                 </div>
                             </div>
@@ -228,7 +262,7 @@ export default function ContactPage({ params }: ContactPageProps) {
                                     </p>
 
                                     <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
-                                        {post.seller.city}
+                                        {post.user.city}
                                     </p>
                                 </div>
                             </div>
@@ -248,10 +282,10 @@ export default function ContactPage({ params }: ContactPageProps) {
                                     </p>
 
                                     <a
-                                        href={`tel:${post.seller.phone}`}
+                                        href={`tel:${post.user.phone}`}
                                         className="mt-1 block truncate text-sm font-semibold text-gray-900 hover:underline dark:text-white"
                                     >
-                                        {post.seller.phone}
+                                        {post.user.phone}
                                     </a>
                                 </div>
                             </div>
@@ -271,10 +305,10 @@ export default function ContactPage({ params }: ContactPageProps) {
                                     </p>
 
                                     <a
-                                        href={`mailto:${post.seller.email}`}
+                                        href={`mailto:${post.user.email}`}
                                         className="mt-1 block truncate text-sm font-semibold text-gray-900 hover:underline dark:text-white"
                                     >
-                                        {post.seller.email}
+                                        {post.user.email}
                                     </a>
                                 </div>
                             </div>
@@ -282,7 +316,7 @@ export default function ContactPage({ params }: ContactPageProps) {
                             {/* Contact Buttons */}
                             <div className="mt-2 grid grid-cols-2 gap-3">
                                 <a
-                                    href={`tel:${post.seller.phone}`}
+                                    href={`tel:${post.user.phone}`}
                                     className="flex items-center justify-center gap-2 rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                                 >
                                     <Phone size={17} />
@@ -290,7 +324,7 @@ export default function ContactPage({ params }: ContactPageProps) {
                                 </a>
 
                                 <a
-                                    href={`mailto:${post.seller.email}`}
+                                    href={`mailto:${post.user.email}`}
                                     className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                                 >
                                     <Mail size={17} />
@@ -304,3 +338,4 @@ export default function ContactPage({ params }: ContactPageProps) {
         </main>
     );
 }
+

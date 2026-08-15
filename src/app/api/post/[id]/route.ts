@@ -5,6 +5,53 @@ import User from "@/models/User";
 import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/mongoose";
 
+// =========================
+// GET SINGLE POST
+// =========================
+
+export async function GET(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        await connectDB();
+
+        const { id } = await params;
+
+        const post = await Post.findById(id).populate(
+            "user",
+            "name email phone city role"
+        );
+
+        if (!post) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Post not found.",
+                },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json(
+            {
+                success: true,
+                post,
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("GET SINGLE POST ERROR:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to fetch post.",
+            },
+            { status: 500 }
+        );
+    }
+}
 
 // =========================
 // PATCH POST
@@ -40,7 +87,6 @@ export async function PATCH(
             image,
         } = body;
 
-        // Find current user
         const user = await User.findOne({
             email: session.user.email,
         });
@@ -55,7 +101,6 @@ export async function PATCH(
             );
         }
 
-        // Find post owned by current user
         const post = await Post.findOne({
             _id: id,
             user: user._id,
@@ -71,7 +116,6 @@ export async function PATCH(
             );
         }
 
-        // Update only the fields that were sent
         if (title !== undefined) {
             post.title = title;
         }
@@ -162,7 +206,6 @@ export async function DELETE(
             },
             { status: 200 }
         );
-
     } catch (error) {
         console.error("DELETE POST ERROR:", error);
 
