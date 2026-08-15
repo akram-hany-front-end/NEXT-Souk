@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
-import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
+import { connectDB } from "@/lib/mongoose";
 
 export async function POST(request: Request) {
     try {
